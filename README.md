@@ -47,25 +47,7 @@ page 1 with names at roughly 10-point type, and the full roster table
 the hover details are on paper too. If the greens come out white, enable
 "Background graphics" in the print dialog.
 
-## Hosting + embedding in Drupal 10
-
-**OneDrive will not work** — it never serves HTML files as web pages, only as
-downloads or previews, so an iframe pointing at OneDrive shows nothing.
-
-Best options, in order:
-
-1. **Your own Drupal server (recommended).** Ask your web admin to upload
-   `new-hires-map.html` to the site's public files area
-   (`/sites/default/files/`). It's one static file, no server code. Same-origin
-   means no iframe restrictions at all.
-2. **GitHub Pages** — free, reliable, no server: create a public repository,
-   upload the file, enable Pages in Settings. Note the page contents (the
-   names) become public on GitHub itself, which they would be on your site
-   anyway.
-3. **Netlify Drop** (drop.netlify.com) — drag the file onto the page, get a
-   URL. Free tier is fine for this.
-
-Then in Drupal, add this to any page that allows full HTML / iframes:
+In Drupal, add this to any page that allows full HTML / iframes:
 
 ```html
 <iframe src="https://YOUR-URL/new-hires-map.html"
