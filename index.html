@@ -25,7 +25,7 @@
     line-height:1.45;
   }
   .sheet{
-    max-width:1060px;margin:0 auto;padding:28px 32px 20px;
+    max-width:1076px;margin:0 auto;padding:28px 42px 20px;
     background:var(--sheet);
   }
   header.masthead{
@@ -68,17 +68,16 @@
   .pin:focus-visible circle{stroke:var(--focus);stroke-width:2.5}
   .leader{stroke:var(--ink-soft);stroke-width:.8;fill:none}
   #tooltip{
-    position:absolute;z-index:5;max-width:240px;pointer-events:auto;
+    position:absolute;z-index:5;max-width:300px;pointer-events:auto;
     background:#ffffff;color:var(--ink);border:1px solid var(--rule);
     border-left:4px solid var(--accent);border-radius:4px;
     padding:10px 12px;font-size:.85rem;line-height:1.4;
     box-shadow:0 3px 14px rgba(28,51,37,.18);
   }
   #tooltip[hidden]{display:none}
-  #tooltip .t-name{font-weight:700;font-size:.9rem}
-  #tooltip .t-city{color:var(--ink-soft)}
-  #tooltip .t-uni{margin-top:4px}
-  #tooltip .t-major{color:var(--ink-soft);font-style:italic}
+  #tooltip .t-name{font-weight:700;font-size:.9rem;margin-bottom:3px}
+  #tooltip .t-line{margin-top:2px}
+  #tooltip .t-k{font-weight:600;color:var(--ink-soft)}
   details.roster{margin:14px 0 0;border-top:1px solid var(--rule);padding-top:10px}
   details.roster summary{
     cursor:pointer;font-weight:600;color:var(--accent-dark);font-size:.9rem;
@@ -126,7 +125,7 @@
     </div>
   </header>
 
-  <p class="hint no-print" id="map-hint">Every name is pinned to the university where they studied. Hover, tap, or press <kbd>Tab</kbd> on a name for the city, university, degree, and area of study. Press <kbd>Esc</kbd> to dismiss.</p>
+  <p class="hint no-print" id="map-hint">Every name is pinned to the university where they studied. Hover, tap, or press <kbd>Tab</kbd> on a name for their role, specialty, and alma mater. Press <kbd>Esc</kbd> to dismiss.</p>
 
   <div class="map-wrap" id="mapWrap">
     <svg class="usmap" viewBox="0 0 975 610" role="group" aria-labelledby="map-title map-desc">
@@ -150,9 +149,9 @@
     <summary class="no-print-summary">View the full roster as a table</summary>
     <h2 class="roster-print-title">Roster</h2>
     <table id="rosterTable">
-      <caption>New hires of the College of Liberal Arts: department, university, degree, and area of study.</caption>
+      <caption>New hires of the College of Liberal Arts: department, role, specialty, university, and area of study.</caption>
       <thead>
-        <tr><th scope="col">Name</th><th scope="col">Department</th><th scope="col">University</th><th scope="col">City</th><th scope="col">Degree</th><th scope="col">Area of study</th></tr>
+        <tr><th scope="col">Name</th><th scope="col">Department</th><th scope="col">Role</th><th scope="col">Specialty</th><th scope="col">University</th><th scope="col">Area of Study</th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -175,31 +174,68 @@
      anchor is "start" (text grows rightward), "middle", or "end".
    ================================================================ */
 const PEOPLE = [
-  { name:"Sean Noah",         department:"PSY/CD",     city:"Davis",         state:"CA", lat:38.5449, lon:-121.7405, university:"UC Davis",                          degree:"PhD",      major:"Psychology / Cognitive Neuroscience",
-    label:{dx:0, dy:-10, anchor:"middle"} },
-  { name:"Paige Pellaton",    department:"POLS",       city:"Davis",         state:"CA", lat:38.5449, lon:-121.7405, university:"UC Davis",                          degree:"PhD",      major:"Political Science",
-    label:{dx:10, dy:7, anchor:"start"} },
-  { name:"Alex Cohen",        department:"JOUR",       city:"Berkeley",      state:"CA", lat:37.8719, lon:-122.2585, university:"UC Berkeley",                       degree:"Master’s", major:"Broadcast Journalism",
-    label:{dx:10, dy:12, anchor:"start"} },
-  { name:"Lindsay Miller",    department:"COMS",       city:"Santa Barbara", state:"CA", lat:34.4140, lon:-119.8489, university:"UC Santa Barbara",                  degree:"PhD",      major:"Communication",
+  /* ---------- Tenure-track faculty ---------- */
+  { name:"Sean Noah",         department:"Psychology and Child Development",  role:"Assistant Professor", specialty:"Cognitive Neuroscience",
+    city:"Davis", state:"CA", lat:38.5449, lon:-121.7405, university:"UC Davis", major:"Psychology / Cognitive Neuroscience",
     label:{dx:0, dy:-12, anchor:"middle"} },
-  { name:"Emma Kemp",         department:"ART/DESIGN", city:"Valencia",      state:"CA", lat:34.3917, lon:-118.5426, university:"California Institute of the Arts",  degree:"MFA",      major:"Critical Studies Writing – Art",
+  { name:"Paige Pellaton",    department:"Political Science",                 role:"Assistant Professor", specialty:"Public Policy or Public Administration",
+    city:"Davis", state:"CA", lat:38.5449, lon:-121.7405, university:"UC Davis", major:"Political Science",
+    label:{dx:10, dy:5, anchor:"start"} },
+  { name:"Alex Cohen",        department:"Journalism",                        role:"Assistant Professor", specialty:"Digital and Interactive Storytelling",
+    city:"Berkeley", state:"CA", lat:37.8719, lon:-122.2585, university:"UC Berkeley", major:"Broadcast Journalism",
+    label:{dx:-9, dy:3, anchor:"end"} },
+  { name:"Lindsay Miller",    department:"Communication Studies",             role:"Assistant Professor", specialty:"Social Media and Strategic Communication",
+    city:"Santa Barbara", state:"CA", lat:34.4140, lon:-119.8489, university:"UC Santa Barbara", major:"Communication",
+    label:{dx:0, dy:-12, anchor:"middle"} },
+  { name:"Emma Kemp",         department:"Art and Design",                    role:"Assistant Professor", specialty:"Design Foundations",
+    city:"Valencia", state:"CA", lat:34.3917, lon:-118.5426, university:"California Institute of the Arts", major:"Critical Studies Writing – Art",
     label:{dx:12, dy:3, anchor:"start"} },
-  { name:"Alison Maggart",    department:"MUS",        city:"Los Angeles",   state:"CA", lat:34.0224, lon:-118.2851, university:"University of Southern California", degree:"PhD",      major:"Musicology",
+  { name:"Alison Maggart",    department:"Music",                             role:"Assistant Professor", specialty:"Musicology / Music History",
+    city:"Los Angeles", state:"CA", lat:34.0224, lon:-118.2851, university:"University of Southern California", major:"Musicology",
     label:{dx:-11, dy:1, anchor:"end"} },
-  { name:"Hamsini Sridharan", department:"COMS",       city:"Los Angeles",   state:"CA", lat:34.0224, lon:-118.2851, university:"University of Southern California", degree:"ABD",      major:"Communication",
+  { name:"Hamsini Sridharan", department:"Communication Studies",             role:"Assistant Professor", specialty:"Technology & Communication",
+    city:"Los Angeles", state:"CA", lat:34.0224, lon:-118.2851, university:"University of Southern California", major:"Communication",
     label:{dx:-11, dy:20, anchor:"end"} },
-  { name:"Jordan Grasso",     department:"ISLA",       city:"Irvine",        state:"CA", lat:33.6846, lon:-117.8265, university:"UC Irvine",                         degree:"PhD",      major:"Criminology, Law and Society",
+  { name:"Jordan Grasso",     department:"Interdisciplinary Studies in Liberal Arts", role:"Assistant Professor", specialty:"Ethics, Law and Social Justice",
+    city:"Irvine", state:"CA", lat:33.6846, lon:-117.8265, university:"UC Irvine", major:"Criminology, Law and Society",
     label:{dx:12, dy:8, anchor:"start"} },
-  { name:"Maya Richards",     department:"ENGL",       city:"San Diego",     state:"CA", lat:32.8801, lon:-117.2340, university:"UC San Diego",                      degree:"PhD",      major:"Literature",
-    label:{dx:11, dy:10, anchor:"start"} },
-  { name:"Yuming Fang",       department:"COMS",       city:"Minneapolis",   state:"MN", lat:44.9778, lon:-93.2650,  university:"University of Minnesota",           degree:"PhD",      major:"Mass Communication" },
-  { name:"Christina Crespo",  department:"WGQS",       city:"Athens",        state:"GA", lat:33.9519, lon:-83.3576,  university:"University of Georgia",             degree:"PhD",      major:"Integrated Conservation and Anthropology" },
-  { name:"Emilio Carrero",    department:"ENGL",       city:"Tallahassee",   state:"FL", lat:30.4383, lon:-84.2807,  university:"Florida State University",          degree:"PhD",      major:"Creative Nonfiction" },
-  { name:"Qianyi Qin",        department:"PHIL",       city:"New York",      state:"NY", lat:40.7484, lon:-73.9840,  university:"CUNY Graduate Center",              degree:"PhD",      major:"Philosophy",
+  { name:"Maya Richards",     department:"English",                           role:"Assistant Professor", specialty:"Modern/Contemporary American Literature",
+    city:"San Diego", state:"CA", lat:32.8801, lon:-117.2340, university:"UC San Diego", major:"Literature",
+    label:{dx:11, dy:19, anchor:"start"} },
+  { name:"Yuming Fang",       department:"Communication Studies",             role:"Assistant Professor", specialty:"Social Media and Strategic Communication",
+    city:"Minneapolis", state:"MN", lat:44.9778, lon:-93.2650, university:"University of Minnesota", major:"Mass Communication" },
+  { name:"Christina Crespo",  department:"Women’s, Gender & Queer Studies", role:"Assistant Professor", specialty:"Feminist/Queer Science & Technology Studies",
+    city:"Athens", state:"GA", lat:33.9519, lon:-83.3576, university:"University of Georgia", major:"Integrated Conservation and Anthropology" },
+  { name:"Emilio Carrero",    department:"English",                           role:"Assistant Professor", specialty:"Latinx/e Literature & Creative Writing",
+    city:"Tallahassee", state:"FL", lat:30.4383, lon:-84.2807, university:"Florida State University", major:"Creative Nonfiction" },
+  { name:"Qianyi Qin",        department:"Philosophy",                        role:"Assistant Professor", specialty:"Asian Philosophy",
+    city:"New York", state:"NY", lat:40.7484, lon:-73.9840, university:"CUNY Graduate Center", major:"Philosophy",
     label:{dx:11, dy:-5, anchor:"start"} },
-  { name:"Yasmeen Chism",     department:"ES",         city:"New York",      state:"NY", lat:40.7295, lon:-73.9965,  university:"New York University",               degree:"PhD",      major:"Performance Studies",
+  { name:"Yasmeen Chism",     department:"Ethnic Studies",                    role:"Assistant Professor", specialty:"African American/Black Studies",
+    city:"New York", state:"NY", lat:40.7295, lon:-73.9965, university:"New York University", major:"Performance Studies",
     label:{dx:11, dy:15, anchor:"start"} },
+  /* ---------- Full-time lecturers ---------- */
+  { name:"Cole Manley",       department:"History",                           role:"Full Time Lecturer", specialty:"Environmental Humanities",
+    city:"Davis", state:"CA", lat:38.5449, lon:-121.7405, university:"UC Davis", major:"History",
+    label:{dx:10, dy:21, anchor:"start"} },
+  { name:"Elizabeth Boylan",  department:"Social Sciences",                   role:"Full Time Lecturer", specialty:"Sociology",
+    city:"Davis", state:"CA", lat:38.5449, lon:-121.7405, university:"UC Davis", major:"Sociology",
+    label:{dx:0, dy:-28, anchor:"middle"} },
+  { name:"Melissa Mesinas",   department:"Psychology and Child Development",  role:"Full Time Lecturer", specialty:"Developmental and Psychological Sciences",
+    city:"Stanford", state:"CA", lat:37.4275, lon:-122.1697, university:"Stanford University", major:"Education",
+    label:{dx:0, dy:16, anchor:"middle"} },
+  { name:"Matthew Melendrez", department:"Psychology and Child Development",  role:"Full Time Lecturer", specialty:"Clinical Mental Health Counseling",
+    city:"Irvine", state:"CA", lat:33.6560, lon:-117.8140, university:"Concordia University Irvine", major:"Counseling",
+    label:{dx:12, dy:23, anchor:"start"} },
+  { name:"Jensen Jeung",      department:"Social Sciences",                   role:"Full Time Lecturer", specialty:"Sociology",
+    city:"Baton Rouge", state:"LA", lat:30.4515, lon:-91.1871, university:"Louisiana State University", major:"Sociology" },
+  { name:"Jeewoo Shin",       department:"Social Sciences",                   role:"Full Time Lecturer", specialty:"Sociology",
+    city:"Albany", state:"NY", lat:42.6526, lon:-73.7562, university:"University at Albany", major:"Sociology",
+    label:{dx:-9, dy:4, anchor:"end"} },
+  { name:"Kay Gim",           department:"Communication Studies",             role:"Assistant Professor", specialty:"Mass Communication and Media Production",
+    city:"Tucson", state:"AZ", lat:32.2319, lon:-110.9501, university:"University of Arizona", major:"Communication" },
+  { name:"Ellie Cleasby",     department:"Social Sciences",                   role:"Full Time Lecturer", specialty:"Geography",
+    city:"Seattle", state:"WA", lat:47.6062, lon:-122.3321, university:"University of Washington", major:"Geography" },
 ];
 
 /* ---------- AlbersUSA projection (matches the map's coordinates) ---------- */
@@ -245,7 +281,8 @@ document.getElementById("nation").setAttribute("d",GEO.nation);
 /* ---------- render pins + labels (west to east for tab order) ---------- */
 const STATE_NAMES={AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",DC:"District of Columbia",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming"};
 const gPins=document.getElementById("pins");
-const placed=PEOPLE.map(p=>({...p, xy:project(p.lon,p.lat)}))
+const placed=PEOPLE.filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon))
+                   .map(p=>({...p, xy:project(p.lon,p.lat)}))
                    .sort((a,b)=>a.xy[0]-b.xy[0]);
 for(const p of placed){
   const [x,y]=p.xy;
@@ -256,9 +293,8 @@ for(const p of placed){
   g.setAttribute("transform",`translate(${x.toFixed(1)},${y.toFixed(1)})`);
   g.setAttribute("tabindex","0");
   g.setAttribute("role","img");
-  const stateFull=STATE_NAMES[p.state]||p.state;
   g.setAttribute("aria-label",
-    `${p.name}. ${p.university} — ${p.city}, ${stateFull}. ${p.degree}, ${p.major}.`);
+    `${p.name}. Role: ${p.role}, ${p.department}. Specialty: ${p.specialty}. Alma mater: ${p.university}.`);
   const c=document.createElementNS(NS,"circle");
   c.setAttribute("r","4.5");
   const t=document.createElementNS(NS,"text");
@@ -278,13 +314,17 @@ tip.setAttribute("aria-hidden","true");
 let tipPin=null;
 function showTip(pin){
   const p=pin._person;
-  tip.innerHTML=
-    `<div class="t-name"></div><div class="t-city"></div>`+
-    `<div class="t-uni"></div><div class="t-major"></div>`;
-  tip.querySelector(".t-name").textContent=p.name;
-  tip.querySelector(".t-city").textContent=`${p.city}, ${STATE_NAMES[p.state]||p.state}`;
-  tip.querySelector(".t-uni").textContent=p.university;
-  tip.querySelector(".t-major").textContent=`${p.degree} · ${p.major}`;
+  tip.textContent="";
+  const nameEl=document.createElement("div");
+  nameEl.className="t-name"; nameEl.textContent=p.name; tip.appendChild(nameEl);
+  for(const [k,v] of [["Role",`${p.role}, ${p.department}`],
+                      ["Specialty",p.specialty],
+                      ["Alma Mater",p.university]]){
+    const line=document.createElement("div"); line.className="t-line";
+    const key=document.createElement("span"); key.className="t-k"; key.textContent=k+": ";
+    line.appendChild(key); line.appendChild(document.createTextNode(v));
+    tip.appendChild(line);
+  }
   tip.hidden=false;
   const wr=wrap.getBoundingClientRect();
   const cr=pin.querySelector("circle").getBoundingClientRect();
@@ -316,17 +356,18 @@ gPins.addEventListener("click",e=>{
   (tipPin===pin&&!tip.hidden)?hideTip():showTip(pin);
 });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") hideTip(); });
+window.addEventListener("resize",()=>hideTip());
 document.addEventListener("pointerdown",e=>{
   if(!e.target.closest(".pin")&&!e.target.closest("#tooltip")) hideTip();
 });
 
 /* ---------- roster table ---------- */
 const tbody=document.querySelector("#rosterTable tbody");
-for(const p of [...placed].sort((a,b)=>a.name.localeCompare(b.name))){
+for(const p of [...PEOPLE].sort((a,b)=>a.name.localeCompare(b.name))){
   const tr=document.createElement("tr");
   const th=document.createElement("th");
   th.setAttribute("scope","row"); th.textContent=p.name; tr.appendChild(th);
-  for(const v of [p.department, p.university, `${p.city}, ${p.state}`, p.degree, p.major]){
+  for(const v of [p.department, p.role, p.specialty, p.university||"\u2014", p.major||"\u2014"]){
     const td=document.createElement("td"); td.textContent=v; tr.appendChild(td);
   }
   tbody.appendChild(tr);
