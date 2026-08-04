@@ -49,7 +49,7 @@
   button.print:focus-visible,summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .hint{color:var(--ink-soft);font-size:.85rem;margin:8px 0 4px}
   .map-wrap{position:relative;margin:0}
-  svg.usmap{display:block;width:100%;height:auto;overflow:visible}
+  svg.usmap{display:block;width:100%;height:auto}
   .state{fill:url(#greens);stroke:#ffffff;stroke-width:1;stroke-linejoin:round}
   .nation{fill:none;stroke:#9cbfa0;stroke-width:1.1;stroke-linejoin:round}
   .pin circle{
@@ -66,7 +66,7 @@
   }
   .pin:hover circle,.pin:focus circle{r:6.5;fill:var(--accent-dark)}
   .pin:focus-visible circle{stroke:var(--focus);stroke-width:2.5}
-  .leader{stroke:var(--ink-soft);stroke-width:.8;fill:none}
+  .leader{stroke:var(--ink-soft);stroke-width:.7;fill:none;opacity:.55}
   #tooltip{
     position:absolute;z-index:5;max-width:300px;pointer-events:auto;
     background:#ffffff;color:var(--ink);border:1px solid var(--rule);
@@ -169,9 +169,13 @@
    - lat / lon: search the web for "<city> <state> coordinates"
      and copy the two numbers (north latitude, negative west longitude).
    - university / major: shown on hover and in the roster table.
-   - label (optional): nudges where the name sits so labels don't
-     overlap. dx moves right(+)/left(−), dy moves down(+)/up(−),
-     anchor is "start" (text grows rightward), "middle", or "end".
+   - label (optional): your preferred spot for the name. dx moves
+     right(+)/left(−), dy moves down(+)/up(−), anchor is "start" (text
+     grows rightward), "middle", or "end".
+     You don't have to get this perfect. After everything is drawn, the
+     page nudges names apart until none overlap, draws a thin leader line
+     from any name that ends up away from its dot, and resizes the frame
+     to hold it all — so nothing is ever cut off, on screen or on paper.
    ================================================================ */
 const PEOPLE = [
   /* ---------- Tenure-track faculty ---------- */
@@ -284,6 +288,7 @@ const gPins=document.getElementById("pins");
 const placed=PEOPLE.filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon))
                    .map(p=>({...p, xy:project(p.lon,p.lat)}))
                    .sort((a,b)=>a.xy[0]-b.xy[0]);
+const pinItems=[];
 for(const p of placed){
   const [x,y]=p.xy;
   const lbl=p.label||{};
@@ -295,6 +300,12 @@ for(const p of placed){
   g.setAttribute("role","img");
   g.setAttribute("aria-label",
     `${p.name}. Role: ${p.role}, ${p.department}. Specialty: ${p.specialty}. Alma mater: ${p.university}.`);
+  const leader=document.createElementNS(NS,"line");
+  leader.setAttribute("class","leader");
+  leader.setAttribute("x1","0"); leader.setAttribute("y1","0");
+  leader.setAttribute("x2","0"); leader.setAttribute("y2","0");
+  leader.setAttribute("aria-hidden","true");
+  leader.style.display="none";
   const c=document.createElementNS(NS,"circle");
   c.setAttribute("r","4.5");
   const t=document.createElementNS(NS,"text");
@@ -302,9 +313,70 @@ for(const p of placed){
   t.setAttribute("text-anchor",anchor);
   t.setAttribute("aria-hidden","true");
   t.textContent=p.name;
-  g.appendChild(c); g.appendChild(t);
+  g.appendChild(leader); g.appendChild(c); g.appendChild(t);
   g._person=p;
   gPins.appendChild(g);
+  pinItems.push({t,leader,x,y,dx,dy,anchor});
+}
+
+/* ---------- label layout ----------
+   Names are nudged vertically until none overlap, then any name that ends up
+   away from its dot gets a thin leader line back to it. Finally the frame is
+   resized to hold everything, so nothing can be cut off on screen or in print. */
+function layoutLabels(){
+  const items=pinItems.map(it=>{
+    it.t.setAttribute("y", it.dy);          /* measure from the authored spot */
+    it.leader.style.display="none";
+    const bb=it.t.getBBox();
+    return {...it, w:bb.width, h:bb.height, ox:bb.x, oy:bb.y-it.dy, dy0:it.dy};
+  });
+  const PAD=2.2;
+  const box=it=>({l:it.x+it.ox, r:it.x+it.ox+it.w,
+                  t:it.y+it.oy+it.dy, b:it.y+it.oy+it.dy+it.h});
+  for(let pass=0; pass<120; pass++){
+    let moved=false;
+    for(let i=0;i<items.length;i++){
+      for(let j=i+1;j<items.length;j++){
+        const A=box(items[i]), B=box(items[j]);
+        if(A.l<B.r+PAD && B.l<A.r+PAD && A.t<B.b+PAD && B.t<A.b+PAD){
+          const shove=((Math.min(A.b,B.b)-Math.max(A.t,B.t))+PAD)/2+0.15;
+          if(A.t+A.b<=B.t+B.b){ items[i].dy-=shove; items[j].dy+=shove; }
+          else { items[i].dy+=shove; items[j].dy-=shove; }
+          moved=true;
+        }
+      }
+    }
+    if(!moved) break;
+  }
+  for(const it of items){
+    it.t.setAttribute("y", it.dy.toFixed(1));
+    const midY=it.dy-4.6;
+    const ex=it.anchor==="start" ? it.dx-3 : it.anchor==="end" ? it.dx+3 : it.dx;
+    const ey=it.anchor==="middle" ? (it.dy>0 ? it.dy-11.5 : it.dy+4.5) : midY;
+    if(Math.hypot(ex,ey)>19){
+      it.leader.setAttribute("x2", ex.toFixed(1));
+      it.leader.setAttribute("y2", ey.toFixed(1));
+      it.leader.style.display="";
+    }
+  }
+}
+
+/* Resize the frame to whatever the map + names actually occupy. */
+function fitFrame(){
+  const svg=document.querySelector("svg.usmap");
+  svg.removeAttribute("viewBox");
+  svg.setAttribute("viewBox","0 0 975 610");
+  const bb=svg.getBBox();
+  const pad=7;
+  svg.setAttribute("viewBox",
+    `${(bb.x-pad).toFixed(1)} ${(bb.y-pad).toFixed(1)} `+
+    `${(bb.width+pad*2).toFixed(1)} ${(bb.height+pad*2).toFixed(1)}`);
+}
+
+layoutLabels();
+fitFrame();
+if(document.fonts&&document.fonts.ready){
+  document.fonts.ready.then(()=>{ layoutLabels(); fitFrame(); });
 }
 
 /* ---------- tooltip (visual only; details live in aria-labels + table) ---------- */
