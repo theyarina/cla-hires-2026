@@ -83,7 +83,11 @@
     cursor:pointer;font-weight:600;color:var(--accent-dark);font-size:.9rem;
   }
   table{border-collapse:collapse;width:100%;margin-top:10px;font-size:.88rem}
-  caption{text-align:left;color:var(--ink-soft);font-size:.82rem;padding-bottom:6px}
+  /* caption stays for screen readers, but is not shown or printed */
+  caption{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+  }
   th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--rule)}
   th{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
   tbody th{font-size:.88rem;text-transform:none;letter-spacing:0;color:var(--ink);font-weight:600}
@@ -104,6 +108,14 @@
     details.roster summary{display:none}
     details.roster .roster-print-title{display:block}
     #tooltip{display:none !important}
+    /* fit all 24 roster rows onto two pages, with room to spare */
+    .roster-print-title{font-size:1.1rem;margin:0 0 3px}
+    table{font-size:9.5pt;margin-top:3px;line-height:1.3}
+    th,td{padding:4pt 6pt;vertical-align:top}
+    thead th{font-size:8pt;letter-spacing:.04em}
+    tbody th{font-size:9.5pt}
+    tr{break-inside:avoid}
+    thead{display:table-header-group}
   }
   .roster-print-title{
     display:none;
